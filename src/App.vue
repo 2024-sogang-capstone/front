@@ -1,183 +1,177 @@
 <template>
- <div id="app">
-    <img
-      alt="Vue Bot UI"
-      src="./assets/logo.png"
-    />
-    <div id="ChatBox">
-      <VueBotUI
-      :options="botOptions"
-      :messages="messageData"
-      :bot-typing="botTyping"
-      :input-disable="inputDisable"
-      :is-open="true"
-      @msg-send="msgSend"
-    />
-    </div>
-  </div>
-  </template>
-  <script>
-  // import BotIcon from './assets/icons/bot.png'
-  import { VueBotUI } from 'vue-bot-ui'
-  // import { messageService } from './helpers/message'
-  import axios from 'axios'
+  <VueBotUI
+    :options="botOptions"
+    :messages="messageData"
+    :bot-typing="botTyping"
+    :input-disable="inputDisable"
+    :is-open="true"
+    @init="botStart"
+    @msg-send="msgSend"
+  />
+</template>
+<script>
+import { VueBotUI } from 'vue-bot-ui';
+import axios from 'axios';
 
-  export default {
-    components: {
-      VueBotUI
-    },
-  
-    data () {
-      return {
-        userInput: '',
-        messageData: [],
-        botTyping: false,
-        inputDisable: false,
-        botOptions: {
-          botAvatarImg: './assets/icons/bot.png',
-          boardContentBg: '#f4f4f4',
-          msgBubbleBgBot: '#fff',
-          bubbleBtnSize: 0,
-          inputPlaceholder: 'Type hereeee...',
-          inputDisableBg: '#fff',
-          inputDisablePlaceholder: 'Hit the buttons above to respond'
-        }
-      }
-    },
-  
-    methods: {
-      // botStart () {
-      //   // Get token if you want to build a private bot
-      //   // Request first message here
-  
-      //   // Fake typing for the first message
-      //   this.botTyping = true
-      //   setTimeout(() => {
-      //     this.botTyping = false
-      //     this.messageData.push({
-      //       agent: 'bot',
-      //       type: 'text',
-      //       text: '안녕하세요. 무엇을 도와드릴까요?'
-      //     })
-      //   }, 1000)
-      // },
-  
-      msgSend (value) {
-        // Push the user's message to board
-        this.userInput = value.text
-        this.messageData.push({
-          agent: 'user',
-          type: 'text',
-          text: value.text
-        })
-  
-        this.getResponse()
+export default {
+  components: {
+    VueBotUI,
+  },
+
+  data() {
+    return {
+      userInput: '',
+      messageData: [],
+      username: '',
+      isFirstMessage: true,
+      botTyping: false,
+      inputDisable: false,
+      botOptions: {
+        botTitle: '뮤즈릭테일',
+        botAvatarImg: './assets/icons/bot.png',
+        boardContentBg: '#f4f4f4',
+        msgBubbleBgBot: '#fff',
+        bubbleBtnSize: 0,
+        inputPlaceholder: '당신의 이야기를 들려주세요',
+        inputDisableBg: '#fff',
+        inputDisablePlaceholder: 'Hit the buttons above to respond',
       },
-  
-      // Submit the message from user to bot API, then get the response from Bot
-      async getResponse () {
-        // Loading
-        this.botTyping = true
-  
-        // Post the message from user here
-        // Then get the response as below
-  
-        // Create new message from fake data
-        // messageService.createMessage(this.userInput)
-        //   .then((res) => {
-        //     const replyMessage = {
-        //       agent: 'bot',
-        //       ...res
-        //     }
-        //     this.inputDisable = res.disableInput
-        //     this.messageData.push(replyMessage)
-        //     console.log(replyMessage)
-        //     // finish
-        //     this.botTyping = false
-              
-        //     })
-        const input = this.userInput
-        console.log("input is : " + input)
-        const email = 'test@gmail.com'
-        const response = await axios.post(
-          'http://ec2-43-200-182-138.ap-northeast-2.compute.amazonaws.com/api/v1/chat',
-            { input },
-            {
-              headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-                'Accept-Charset': 'utf-8',
-                'user-email': email
-              }
-            }
-        )
+    };
+  },
 
-        const result = response.data.data;
-          
-        this.inputDisable = false;
-        
-        let messageText = `입력하신 문장의 감정 분석 결과는 '${result.emotion}' 입니다.` + "\n1"
-        
-        let replyMessage = {
+  methods: {
+    botStart() {
+      this.botTyping = true;
+      setTimeout(() => {
+        this.botTyping = false;
+        this.messageData.push({
           agent: 'bot',
           type: 'text',
-          text: messageText,
-        }
-        console.log(messageText)
-        this.messageData.push(replyMessage)
+          text: `
+            안녕하세요 뮤즈릭테일입니다.
+            감정을 기반으로 노래를 추천해드릴게요. 
+            먼저 이름을 알려주세요.
+          `,
+        });
+      }, 1000);
+    },
 
-        messageText = `해당 감정을 기반으로 추천된 노래 결과는 다음과 같습니다. <br>`
-        replyMessage = {
-          agent: 'bot',
-          type: 'text',
-          text: messageText,
-        }
-        this.messageData.push(replyMessage)
+    async msgSend(value) {
+      this.userInput = value.text;
+      this.messageData.push({
+        agent: 'user',
+        type: 'text',
+        text: value.text,
+      });
 
-        messageText = ''
-        const songs = result.songs;
-        let songNum = 1
-        songs.forEach((song) => {
-          messageText += `${songNum}. ${song.title}` + "\n" + `가수: ${song.singer}<br>link: ${song.link}` + "\n"
-          songNum++
-        })
-        replyMessage = {
-          agent: 'bot',
-          type: 'text',
-          text: `${messageText}`,
-        }
-        this.messageData.push(replyMessage)
-        console.log(replyMessage.text)
-        this.botTyping = false
-        // console.log(replyMessage)
-        console.log(result)
-        return result
+      if (this.isFirstMessage) {
+        this.isFirstMessage = false;
+        this.username = value.text.trim();
+        this.botTyping = true;
+        setTimeout(() => {
+          this.botTyping = false;
+          this.messageData.push({
+            agent: 'bot',
+            type: 'text',
+            text: `${this.username}님 이제 감정을 분석해볼게요. 당신의 이야기를 들려주세요.`,
+          });
+        }, 1000);
+        return;
       }
-    }
-  }
-  </script>
-  <style lang="scss">
-  #app {
-    font-family: "Avenir", Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-    margin-top: 60px;
-    justify-content: center;
-    align-items: center;
-  }
-  .qkb-board {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  overflow: hidden;
-  // width: $board-width;
-  height: 80vh;
-  margin-right: auto;
-  margin-left: auto;
-  margin-bottom: 10px;
-  // border-radius: $board-radius;
-  // background-color: $board-bg;
-  box-shadow: 0 3px 30px 0 rgba(0, 0, 0, .15);
+
+      this.getResponse();
+    },
+
+    async getResponse() {
+      this.botTyping = true;
+      const input = this.userInput;
+      const email = 'test@gmail.com';
+
+      const response = await axios.post(
+        'http://ec2-43-200-182-138.ap-northeast-2.compute.amazonaws.com/api/v1/chat',
+        { input },
+        {
+          headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+            'Accept-Charset': 'utf-8',
+            'user-email': email,
+          },
+        }
+      );
+
+      const result = response.data.data;
+      this.inputDisable = true;
+
+      await this.sendMessage(
+        `현재 ${this.username}님의 감정은 "${result.emotion}" 이군요. 해당 감정에 어울리는 노래를 추천해드릴게요.`
+      );
+
+      await this.sendBtnMessage(
+        `${this.username}님의 감정을 바탕으로 ${result.songs.length}개의 노래를 추천해드렸어요.`,
+        result.songs
+      );
+
+      await this.sendMessage(
+        `더 많은 노래를 추천받고 싶으시면, 또 다른 이야기를 들려주세요.`
+      );
+
+      setTimeout(() => {
+        this.inputDisable = false;
+        this.botTyping = false;
+      }, 2000);
+      return result;
+    },
+
+    async sendMessage(message) {
+      setTimeout(() => {
+        this.messageData.push({
+          agent: 'bot',
+          type: 'text',
+          text: message,
+        });
+      }, 1000);
+    },
+
+    async sendBtnMessage(message, songs) {
+      setTimeout(() => {
+        this.messageData.push({
+          agent: 'bot',
+          type: 'button',
+          text: message,
+          options: songs.map((song) => {
+            return {
+              text: `${song.title} - ${song.singer}`,
+              value: `${song.link}`,
+              action: 'url',
+            };
+          }),
+        });
+      }, 1000);
+    },
+  },
+};
+</script>
+<style lang="scss">
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+  justify-content: center;
+  align-items: center;
+  font-size: 10em;
 }
-  </style>
+.qkb-board {
+  display: flex;
+  overflow: hidden;
+  height: 95vh;
+  width: 97vw;
+  justify-content: center;
+  box-shadow: 0 3px 30px 0 rgba(0, 0, 0, 0.15);
+}
+.qkb-msg-bubble-component {
+  font-size: 1.5em;
+}
+</style>
