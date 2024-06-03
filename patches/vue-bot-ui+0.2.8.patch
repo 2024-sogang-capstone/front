@@ -1,0 +1,25 @@
+diff --git a/node_modules/vue-bot-ui/src/components/BotUI.vue b/node_modules/vue-bot-ui/src/components/BotUI.vue
+index fec9909..e3e1ac8 100644
+--- a/node_modules/vue-bot-ui/src/components/BotUI.vue
++++ b/node_modules/vue-bot-ui/src/components/BotUI.vue
+@@ -35,6 +35,8 @@
+   AppStyle(:options="optionsMain")
+   .qkb-preload-image
+     .qkb-msg-avatar__img(v-if="optionsMain.botAvatarImg")
++  .qkb-msg-bubble-component.qkb-msg-bubble-component--single-text
++    .qkb-msg-bubble-component__text(v-html="mainData.text")
+ </template>
+ <script>
+ import EventBus from '../helpers/event-bus'
+diff --git a/node_modules/vue-bot-ui/src/components/MessageBubble/SingleText.vue b/node_modules/vue-bot-ui/src/components/MessageBubble/SingleText.vue
+index ad91a2a..4c222cf 100644
+--- a/node_modules/vue-bot-ui/src/components/MessageBubble/SingleText.vue
++++ b/node_modules/vue-bot-ui/src/components/MessageBubble/SingleText.vue
+@@ -1,6 +1,6 @@
+ <template lang="pug">
+ .qkb-msg-bubble-component.qkb-msg-bubble-component--single-text
+-  .qkb-msg-bubble-component__text {{ mainData.text }}
++  .qkb-msg-bubble-component__text(v-html="mainData.text")
+ </template>
+ <script>
+ export default {

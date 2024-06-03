@@ -1,0 +1,96 @@
+<template>
+  <div id="app">
+    <img alt="Vue logo" src="./assets/logo.png">
+    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
+    <VueBotUI
+  :messages="data"
+  :options="botOptions"
+  :is-open="true"
+  @msg-send="msgSend" id="chatbot"
+/>
+  </div>
+</template>
+
+<script>
+// import HelloWorld from './components/HelloWorld.vue'
+import {VueBotUI} from 'vue-bot-ui'
+import axios from 'axios';
+// import {messageService} from './helpers/message'
+
+export default {
+  name: 'App',
+  components: {
+    // HelloWorld,
+    VueBotUI,
+  },
+  data () {
+  return {
+    input : '',
+    messageData: [],
+      botTyping: false,
+      inputDisable: false,
+      botOptions: {
+        boardContentBg: '#f4f4f4',
+        msgBubbleBgBot: '#fff',
+        inputPlaceholder: 'Type here...',
+        inputDisableBg: '#fff',
+        inputDisablePlaceholder: 'Hit the buttons above to respond'
+      }
+    }
+  },
+  methods:{
+    msgSend(userInput){
+      this.input = userInput.text
+      console.log(this.input)
+      // const email = 'test@gmail.com'
+      
+      this.messageData.push({
+        agent: 'user',
+        type: 'text',
+        text: userInput.text,
+        disableInput: false,
+      })
+      console.log(this.messageData[0].text)
+      this.getResponse()
+    },
+    async getResponse(){
+      //this.botTyping = true
+      const input = this.input
+      const email = 'test@gmail.com'
+      const response = await axios.post(
+        'http://ec2-43-200-182-138.ap-northeast-2.compute.amazonaws.com/api/v1/chat',
+          { input },
+          {
+            headers: {
+              'Content-Type': 'application/json;charset=utf-8',
+              'Accept-Charset': 'utf-8',
+              'user-email': email
+            }
+          }
+      )
+      const result = response.data.data;
+      const emotion = result.emotion;
+      const songs = result.songs;
+      console.log(emotion);
+        songs.forEach((song) => {
+          console.log(`제목 : ${song.title}, 가수 : ${song.singer}, 링크 : ${song.link}`);
+        })
+    }
+  }
+}
+</script>
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+
+#chatbot{
+  margin-right:500px;
+}
+</style>
