@@ -53,6 +53,20 @@ export default {
             먼저 이름을 알려주세요.
           `,
         });
+
+        /**
+         * 한글 입력이 두 번 되는 문제 해결을 위해서, vue-bot-ui의 input을 제거하고 직접 eventListener를 추가
+         */
+        const oldInput = document.querySelector('.qkb-board-action__input');
+        const newInput = oldInput.cloneNode(true);
+        oldInput.parentNode.replaceChild(newInput, oldInput);
+
+        newInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && e.isComposing === false) {
+            this.msgSend({ text: e.target.value });
+            newInput.value = '';
+          }
+        });
       }, 1000);
     },
 
